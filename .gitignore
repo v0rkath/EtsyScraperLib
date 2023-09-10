@@ -1,0 +1,13 @@
+# Ignore irrelevent folders #
+#############################
+.vscode/
+.git/
+
+
+# Ignore specific files and folders eithin "etsyscraper" folder #
+#################################################################
+etsyscraper/__pycache/
+etsyscraper/Include/
+etsyscraper/Lib/
+etsyscraper/Scripts/
+etsyscraper/pyenv.cfg
