@@ -6,8 +6,8 @@
 
 # Ignore specific files and folders eithin "etsyscraper" folder #
 #################################################################
-etsyscraper/__pycache/
+etsyscraper/__pycache__/
 etsyscraper/Include/
 etsyscraper/Lib/
 etsyscraper/Scripts/
-etsyscraper/pyenv.cfg
+etsyscraper/pyvenv.cfg

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-from typing import List, Union
-from text_format import format_sales
+from typing import List
+from text_format import format_admirers
 
 
 class Store:
@@ -12,6 +12,7 @@ class Store:
     sales_quantity: int = 0
     product_quantity: int = 0
     review_rating: int = 0
+    admirers: int = 0
     product_titles: List[str] = []
     product_urls: List[str] = []
     product_prices: List[int] = []
@@ -59,7 +60,7 @@ class Store:
         review_band = self.soup.find("div", {"class": "shop-sales-reviews"})
         span = review_band.find("span", {"class": "wt-text-caption wt-no-wrap"})
         a = span.find("a")
-        self.sales_quantity = format_sales(a.text)
+        self.sales_quantity = a.text.replace(" Sales", "")
 
 
     def print_sales_quantity(self):
@@ -77,7 +78,7 @@ class Store:
         div = side_bar.find("div", {"class": "wt-tab-container"})
         button = div.find("button")
         span = button.find("span", {"class": "wt-mr-md-2"})
-        self.product_quantity = format_sales(span.text)
+        self.product_quantity = span.text
 
 
     def print_product_quantity(self):
@@ -103,3 +104,17 @@ class Store:
             i += 1
 
         return i - 1
+
+
+    def get_admirers(self):
+        """
+        Get the amount of admirers the store has.
+        """
+        shop_sidebar = self.soup.find("div", {"class": "shop-home-wider-sections"})
+        link_section = shop_sidebar.find(lambda tag: tag.name == "a" and "favoriters" in tag.get("href", ""))
+        if link_section:
+            text = link_section.text
+            format_text = text.replace(" Admirers", "")
+            self.admirers = int(format_text)
+        else:
+            print("No admirers found.")

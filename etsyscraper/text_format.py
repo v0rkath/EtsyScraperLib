@@ -1,16 +1,5 @@
 import re
 
-def format_sales(sales: str) -> str:
-    """
-    Remove ` Sales` and `,` from the sales quantity.
-    Returns:
-        The sales figure with only numeric characters.
-    """
-    new_string = sales.replace(" Sales", "").replace(",", "")
-
-    return new_string
-
-
 def format_title(title: str) -> str:
     """
     Remove " - Etsy..." from the title.

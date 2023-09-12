@@ -63,4 +63,6 @@ class Product:
         review_quantity = self.soup.find("span", {"class": "wt-badge--statusInformational"})
         self.review_quantity = int(review_quantity.text.lstrip().rstrip())
 
+    
+
         
