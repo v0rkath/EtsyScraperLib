@@ -13,7 +13,7 @@ CLASSIFIERS = [
 ]
  
 setup(
-  name='etsyscraper',
+  name='EtsyScraperLib',
   version=VERSION,
   author='v0rkath',
   author_email='<x02@fastmail.com>',
