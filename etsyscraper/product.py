@@ -1,18 +1,20 @@
 from bs4 import BeautifulSoup
 import requests
+import json
+import re
 from typing import List, Union
 from text_format import format_title, format_description
 
 class Product:
     # Product info
-    page_html: str = ''
-    product_title: str = ''
+    title: str = ''
+    price: str = ''
     description: str = ''
     review_quantity: int = 0
     media_urls: List[str] = []
     
     # Beautiful Soup info
-    soup: str = ""
+    soup: str = ''
 
 
     def __init__(self, product_url: str):
@@ -33,8 +35,8 @@ class Product:
             request.raise_for_status()  # checks for non-2xx status codes
 
             print('[?] Request was successful.')
-            self.page_html = request.text
-            self.soup = BeautifulSoup(self.page_html, 'html.parser')
+            page_html = request.text
+            self.soup = BeautifulSoup(page_html, 'html.parser')
 
         except requests.exceptions.RequestException as e:
             print('[!] Request failed', e)
@@ -44,26 +46,55 @@ class Product:
         """
         Extract the title of the product.
         """
-        self.product_title = format_title(self.soup.title.text)
+        try:
+            self.title = format_title(self.soup.title.text)
+        except AttributeError:
+            print('[AttributeError]: Title couldn\'t be found.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
 
     
     def get_description(self):
         """
         Extract the description of the product. 
         """
-        description_toggle = self.soup.find('div', {'d': 'wt-content-toggle-product-details-read-more'})
-        paragraph = description_toggle.find('p').text
+        try:
+            description_toggle = self.soup.find('div', {'id': 'wt-content-toggle-product-details-read-more'})
+            paragraph = description_toggle.find('p').text
+            self.description = format_description(paragraph)
+        except AttributeError:
+            print('[AttributeError]: Description couldn\'t be found.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
 
-        self.description = format_description(paragraph)
+
+    def get_price(self):
+        """
+        Extract the price of the product.
+        """
+        try:
+            price_box = self.soup.find('div', {'data-buy-box-region': 'price'})
+            price = price_box.find('p', {'class': re.compile(r'\btitle\b', re.I)})
+            format_price = price.text.replace('Price:', '').strip()
+            self.price = format_price
+        except AttributeError:
+            print('[AttributeError]: Price couldn\'t be found.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
 
 
     def get_review_quantity(self):
         """
         Extract the quantity of reviews for this product.
         """
-        review_quantity = self.soup.find('span', {'class': 'wt-badge--statusInformational'})
-        self.review_quantity = int(review_quantity.text.lstrip().rstrip())
-
+        try:
+            review_quantity = self.soup.find('span', {'class': 'wt-badge--statusInformational'})
+            self.review_quantity = int(review_quantity.text.lstrip().rstrip())
+        except AttributeError:
+            print('[AttributeError]: Reviews couldn\'t be found.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
+            
 
     def __parse_images(self, li: str):
         """
@@ -71,15 +102,20 @@ class Product:
         Args:
             li: The li element for the media.
         """
-        image = li.find('img', {'class': 'carousel-image'})
-        if image is not None and 'srcset' in image.attrs:
-            links = image['srcset']
-            split_urls = links.split(',')
+        try:
+            image = li.find('img', {'class': 'carousel-image'})
+            if image is not None and 'srcset' in image.attrs:
+                links = image['srcset']
+                split_urls = links.split(',')
 
-            for url in split_urls:
-                if '2x' in url:
-                    url = url.strip().split(' ')[0]
-                    self.media_urls.append(url)
+                for url in split_urls:
+                    if '2x' in url:
+                        url = url.strip().split(' ')[0]
+                        self.media_urls.append(url)
+        except AttributeError:
+            print(f'[AttributeError]: Images couldn\'t be parsed.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
 
 
     def __parse_videos(self, li:str):
@@ -88,10 +124,15 @@ class Product:
         Args:
             The li element for the media.
         """
-        video = li.find('video')
-        if video is not None:
-            source = video.find('source').get('src')
-            self.media.append(source)
+        try:
+            video = li.find('video')
+            if video is not None:
+                source = video.find('source').get('src')
+                self.media.append(source)
+        except AttributeError:
+            print('[AttributeError]: Videos couldn\'t be found.')
+        except Exception as e:
+            print(f'[Error Occurred]: {e}')
 
 
     def parse_media(self):
@@ -108,5 +149,35 @@ class Product:
 
         except Exception as e:
             # Handle any exceptions that may occur during parsing
-            print(f"An error occurred: {e}")
-        
+            print(f'[Error Occurred]: {e}')
+
+
+    def get_all_data(self):
+        """
+        Get all data from the store.
+        """
+        print("[?] Collecting product data, this may take a few seconds...")
+        self.get_title()
+        self.get_description()
+        self.get_price()
+        self.get_review_quantity()
+        self.parse_media()
+
+    
+    def generate_json(self):
+        """
+        Formats product data into JSON.
+        Returns:
+            JSON formatted store data.
+        """
+        product_data = {
+            'productName': self.title,
+            'productDescription': self.description,
+            'productPrice': self.price,
+            'productReviews': self.review_quantity,
+            'media': self.media_urls
+        }
+
+        json_data = json.dumps(product_data, indent=4)
+
+        return json_data
