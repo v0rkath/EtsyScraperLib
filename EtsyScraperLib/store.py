@@ -72,25 +72,33 @@ class Store:
             return fail_value
 
 
-    def get_description(self):
+    def get_description(self) -> str:
         """
         Get the description of the store.
+        Returns:
+            String of the store description.
         """
         element = self.__find_element('p', 'class', 'wt-text-caption wt-hide-xs wt-show-lg wt-wrap wt-break-all', 'Description coudn\'t be found.')
         self.store_description = element
+        return self.store_description
 
 
-    def get_location(self):
+    def get_location(self) -> str:
         """
         Get the location of the store.
+        Returns:
+            String of the store location.
         """
         element = self.__find_element('span', 'class', 'shop-location', 'Location couldn\'t be found.')
         self.store_location = element
+        return self.store_location
 
 
-    def get_logo(self):
+    def get_logo(self) -> str:
         """
         Get the store logo url.
+        Returns:
+            String of the URL for the store logo.
         """
         try:
             logo = self.soup.find('img', {'class': 'shop-icon-external'})
@@ -101,11 +109,15 @@ class Store:
         except Exception as e:
             print(f'[Error Occurred]: {e}')
             self.store_logo = 'Logo couldn\'t be found.'
+        finally:
+            return self.store_logo
 
 
-    def get_banner(self):
+    def get_banner(self) -> str:
         """
         Get the store banner url.
+        Returns:
+            String of the URL for the store banner.
         """
         try:
             banner = self.soup.find('img',{'class': 'wt-position-absolute wt-display-block fill-min-height wt-width-full'})
@@ -116,11 +128,15 @@ class Store:
         except Exception as e:
             print(f'[Error Occurred]: {e}')
             self.store_banner = 'Banner couldn\'t be found.'
+        finally:
+            return self.store_banner
 
 
-    def get_sales_quantity(self):
+    def get_sales_quantity(self) -> int:
         """
         Extract the amount of sales the store has had.
+        Returns:
+            Integer of the sales quantity.
         """
         try:
             review_band = self.soup.find('div', {'class': 'shop-sales-reviews'})
@@ -130,11 +146,15 @@ class Store:
             print('[AttributeError]: Sales quantity couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.sales_quantity
 
 
-    def get_product_quantity(self):
+    def get_product_quantity(self) -> int:
         """
         Extract the amount of products for sale by the store.
+        Returns:
+            Integer of the product quantity.
         """
         try:
             side_bar = self.soup.find('div', {'class': 'shop-home-wider-sections'})
@@ -146,6 +166,8 @@ class Store:
             print('[AttributeError]: Product quantity couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.product_quantity
 
 
     def __get_page_quantity(self) -> int:
@@ -155,11 +177,12 @@ class Store:
             Integer of the number of product pages.
         """
         try:
-            pagination = self.soup.find('div', {'class': 'wt-show-xl'})
+            shop_box = self.soup.find('div', {'class': 'shop-home-wider-items'})
+            pagination = shop_box.find('div', {'class': 'wt-show-xl'})
             if pagination:
                 buttons = pagination.find_all('li', class_='wt-action-group__item-container')
                 if buttons:
-                    return len(buttons) - 1
+                    return int(len(buttons) - 1)
                 else:
                     return 0
             return 0
@@ -171,32 +194,41 @@ class Store:
             return 0
 
 
-    def get_admirers(self):
+    def get_admirers(self) -> int:
         """
         Get the amount of admirers the store has.
+        Returns:
+            Integer of admirers.
         """
         try:
             shop_sidebar = self.soup.find('div', {'class': 'shop-home-wider-sections'})
             link_section = shop_sidebar.find(lambda tag: tag.name == 'a' and 'favoriters' in tag.get('href', ''))
             text = link_section.text
-            format_text = text.replace(' Admirers', '')
+            format_text = text.replace(' Admirers', '').replace(' Admirer', '')
             self.admirers = int(format_text)
         except AttributeError:
             print('[AttributeError]: Admirers quantity couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.admirers
 
 
-    def parse_product_urls(self):
+    def parse_product_urls(self) -> List[str]:
         """
         Parse every url of each product from the store.
+        Returns:
+            List of product URLs.
         """
         base_url = self.store_url + '?page='
         page_quantity = self.__get_page_quantity()
+        if page_quantity < 1:
+            page_quantity = 1
 
         for i in range(1, page_quantity + 1):
             try:
                 request = requests.get(base_url + str(i))
+                request.raise_for_status()
                 html = request.text
                 page_soup = BeautifulSoup(html, 'html.parser')
                 listings = page_soup.find('div', {'class': 'responsive-listing-grid'})
@@ -208,18 +240,25 @@ class Store:
                 print('[AttributeError]: Product URLs couldn\'t be found.')
             except Exception as e:
                 print(f'[Error Occurred]: {e}')
+        
+        return self.product_urls
 
 
-    def parse_product_titles(self):
+    def parse_product_titles(self) -> List[str]:
         """
         Parse the title of each product from the store.
+        Returns:
+            List of product titles.
         """
         base_url = self.store_url + '?page='
         page_quantity = self.__get_page_quantity()
+        if page_quantity < 1:
+            page_quantity = 1
 
         for i in range(1, page_quantity + 1):
             try:
                 request = requests.get(base_url + str(i))
+                request.raise_for_status()
                 html = request.text
                 page_soup = BeautifulSoup(html, 'html.parser')
                 listings = page_soup.find('div', {'class': 'responsive-listing-grid'})
@@ -232,18 +271,25 @@ class Store:
                 print('[AttributeError]: Product titles couldn\'t be found.')
             except Exception as e:
                 print(f'[Error Occurred]: {e}')
+        
+        return self.product_titles
 
 
-    def parse_product_prices(self):
+    def parse_product_prices(self) -> List[str]:
         """
         Parse the price of each product from the store.
+        Returns:
+            List of product prices.
         """
         base_url = self.store_url + '?page='
         page_quantity = self.__get_page_quantity()
+        if page_quantity < 1:
+            page_quantity = 1
 
         for i in range(1, page_quantity + 1):
             try:
                 request = requests.get(base_url + str(i))
+                request.raise_for_status()
                 html = request.text
                 page_soup = BeautifulSoup(html, 'html.parser')
                 listings = page_soup.find('div', {'class': 'responsive-listing-grid'})
@@ -259,6 +305,8 @@ class Store:
             except Exception as e:
                 print(f'[Error Occurred]: {e}')
 
+        return self.product_prices
+
     
     def __parse_product_details(self):
         """
@@ -266,9 +314,12 @@ class Store:
         """
         base_url = self.store_url + '?page='
         page_quantity = self.__get_page_quantity()
+        if page_quantity < 1:
+            page_quantity = 1
         
         for i in range(1, page_quantity + 1):
             try:
+                print(i)
                 request = requests.get(f'{base_url}{i}')
                 request.raise_for_status() # exception for non-2xx status
 
@@ -300,9 +351,11 @@ class Store:
         self.__product_details_to_dict()
 
     
-    def __product_details_to_dict(self):
+    def __product_details_to_dict(self) -> dict:
         """
         Append dictionaries of product details to a list.
+        Returns:
+            Dictionary of product titles, URLs and price.
         """
         for i in range(len(self.product_titles)):
             data = {}
@@ -311,10 +364,14 @@ class Store:
             data['productPrice'] = self.product_prices[i]
             self.product_details.append(data)
 
+        return self.product_details
 
-    def get_review_rating(self):
+
+    def get_review_rating(self) -> float:
         """
         Get the the quantity of stars for the store.
+        Returns:
+            Float of review rating.
         """
         try:
             star_span = self.soup.find('span', {'class': 'stars-svg'})
@@ -323,11 +380,15 @@ class Store:
                 print('[AttributeError]: Review ratings couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.review_rating
 
 
-    def get_review_quantity(self):
+    def get_review_quantity(self) -> int:
         """
         Get the quantity of reviews for the store.
+        Returns:
+            Integer of review quantity.
         """
         try:
             review_row = self.soup.find('div', {'class': 'reviews-total'})
@@ -340,6 +401,8 @@ class Store:
                 print('[AttributeError]: Review quantity couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.review_quantity
 
 
     def get_all_data(self):
@@ -359,7 +422,7 @@ class Store:
         self.get_review_quantity()
 
     
-    def generate_json(self):
+    def generate_json(self) -> str:
         """
         Formats store data into JSON
         Returns:

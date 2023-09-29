@@ -3,7 +3,8 @@ import requests
 import json
 import re
 from typing import List, Union
-from text_format import format_title, format_description
+from text_format import format_title
+from text_format import format_description
 
 class Product:
     # Product info
@@ -42,9 +43,11 @@ class Product:
             print('[!] Request failed', e)
     
 
-    def get_title(self):
+    def get_title(self) -> str:
         """
         Extract the title of the product.
+        Returns:
+            String of product title.
         """
         try:
             self.title = format_title(self.soup.title.text)
@@ -52,11 +55,15 @@ class Product:
             print('[AttributeError]: Title couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.title
 
     
-    def get_description(self):
+    def get_description(self) -> str:
         """
-        Extract the description of the product. 
+        Extract the description of the product.
+        Returns:
+            String of product description. 
         """
         try:
             description_toggle = self.soup.find('div', {'id': 'wt-content-toggle-product-details-read-more'})
@@ -66,11 +73,15 @@ class Product:
             print('[AttributeError]: Description couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.description
 
 
-    def get_price(self):
+    def get_price(self) -> str:
         """
         Extract the price of the product.
+        Returns:
+            String of product price.
         """
         try:
             price_box = self.soup.find('div', {'data-buy-box-region': 'price'})
@@ -81,11 +92,15 @@ class Product:
             print('[AttributeError]: Price couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.price
 
 
-    def get_review_quantity(self):
+    def get_review_quantity(self) -> int:
         """
         Extract the quantity of reviews for this product.
+        Returns:
+            Integer of the review quantity.
         """
         try:
             review_quantity = self.soup.find('span', {'class': 'wt-badge--statusInformational'})
@@ -94,6 +109,8 @@ class Product:
             print('[AttributeError]: Reviews couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.review_quantity
             
 
     def __parse_images(self, li: str):
@@ -128,16 +145,18 @@ class Product:
             video = li.find('video')
             if video is not None:
                 source = video.find('source').get('src')
-                self.media.append(source)
+                self.media_urls.append(source)
         except AttributeError:
             print('[AttributeError]: Videos couldn\'t be found.')
         except Exception as e:
             print(f'[Error Occurred]: {e}')
 
 
-    def parse_media(self):
+    def parse_media(self) -> List[str]:
         """
         Parse the product images & video links (highest quality).
+        Returns:
+            List of media URLs.
         """
         try:
             ul = self.soup.find('ul', {'class': 'carousel-pane-list'})
@@ -150,6 +169,8 @@ class Product:
         except Exception as e:
             # Handle any exceptions that may occur during parsing
             print(f'[Error Occurred]: {e}')
+        finally:
+            return self.media_urls
 
 
     def get_all_data(self):
@@ -164,7 +185,7 @@ class Product:
         self.parse_media()
 
     
-    def generate_json(self):
+    def generate_json(self) -> str:
         """
         Formats product data into JSON.
         Returns:
