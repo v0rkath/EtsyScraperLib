@@ -7,6 +7,7 @@ A versatile Python package crafted with the BeautifulSoup4, Requests, and JSON l
 </p>
 
 # Installation
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install EtsyScraperLib.
 ```bash
 pip install EtsyScraperLib
 ```
