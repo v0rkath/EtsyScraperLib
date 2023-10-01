@@ -11,7 +11,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install EtsyScr
 ```bash
 pip install EtsyScraperLib
 ```
-
+<br></br>
 ## Usage: Store Data
 ```python
 from EtsyScraperLib import Store
@@ -72,7 +72,7 @@ print(a_store.generate_json())
     ]
 }
 ```
-
+<br></br>
 ## Usage: Product Data
 ```python
 from EtsyScraperLib import Product
@@ -111,12 +111,11 @@ print(a_product.generate_json())
 }
 
 ```
-
-
+<br></br>
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
+<br></br>
 ## Todo
 - Include `async` for getting all data to increase speed.
 - Code needs a good bit of tidying up.
