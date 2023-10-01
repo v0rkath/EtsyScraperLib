@@ -2,8 +2,9 @@
 <p align="center">
   <img width="600" height="180" src="https://i.imgur.com/86M0L8W.png">
 </p>
-
+<p align="center">
 A versatile Python package crafted with the BeautifulSoup4, Requests, and JSON libraries. With just a few lines of Python code, the scraper can seamlessly extract comprehensive data from any Etsy store. Retrieve essential information such as product listings, pricing, descriptions and seller details.
+</p>
 
 # Setup
 ```cmd
