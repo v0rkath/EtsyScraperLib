@@ -6,12 +6,12 @@
 A versatile Python package crafted with the BeautifulSoup4, Requests, and JSON libraries. With just a few lines of Python code, the scraper can seamlessly extract comprehensive data from any Etsy store. Retrieve essential information such as product listings, pricing, descriptions and seller details.
 </p>
 
-# Setup
-```cmd
+# Installation
+```bash
 pip install EtsyScraperLib
 ```
 
-## Store Data
+## Usage: Store Data
 ```python
 from EtsyScraperLib import Store
 
@@ -72,7 +72,7 @@ print(a_store.generate_json())
 }
 ```
 
-## Product Data
+## Usage: Product Data
 ```python
 from EtsyScraperLib import Product
 
@@ -110,6 +110,11 @@ print(a_product.generate_json())
 }
 
 ```
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
 
 ## Todo
 - Include `async` for getting all data to increase speed.
